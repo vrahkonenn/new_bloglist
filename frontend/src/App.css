@@ -1,0 +1,35 @@
+.individual {
+    text-align: center;
+    margin: 10px auto;
+    background-color: #03B5AA;
+    color: #023436;
+    border: 2px solid #ff8552;
+    border-radius: 10px;
+    width: 75%;
+    overflow-wrap:anywhere;
+}
+
+.hrStyle {
+    width: 75%;
+    border-color: #ff8552;
+}
+
+.mainDiv {
+    color: #03b5aa;
+    text-align: center;
+}
+  
+@media only screen and (max-width: 600px) {
+    .individual {
+        width: 100%;
+    }
+}
+
+.button {
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+.input {
+    margin: 10px;
+}
