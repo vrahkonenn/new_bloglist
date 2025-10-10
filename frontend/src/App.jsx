@@ -104,7 +104,7 @@ const App = () => {
     }
 
     if (!blogObject.title || !blogObject.url) {
-          console.log('Post failed, new blog must contain title and url')
+          console.log('Post failed! New blog must contain title and url!')
           document.getElementById("title").value = ""
           document.getElementById("author").value = ""
           document.getElementById("url").value = ""
