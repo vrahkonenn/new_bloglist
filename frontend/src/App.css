@@ -33,3 +33,17 @@
 .input {
     margin: 10px;
 }
+
+.errorMessage {
+    color: white;
+    font-weight: bold;
+    background-color: red;
+    border-color: white;
+}
+
+.notice {
+    color: white;
+    font-weight: bold;
+    background-color: green;
+    border-color: white;
+}

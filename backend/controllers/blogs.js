@@ -58,6 +58,12 @@ blogsRouter.delete('/:id', middleware.userExtractor, async (request, response) =
 
 blogsRouter.put('/:id', async (request, response) => {
 
+  const user = request.user
+
+  if (!user) {
+    return response.status(400).json({ error: 'userId missing or not valid'})
+  }
+
   if (!request.body.title || !request.body.url) {
     console.log('Post failed, new blog must contain title and url')
     response.status(400).end()
@@ -72,13 +78,18 @@ blogsRouter.put('/:id', async (request, response) => {
       return response.status(404).end()
     }
 
-    blog.title = title
-    blog.author = author
-    blog.url = url
-    blog.likes = likes || 0
-
-    const updatedBlog = await blog.save()
-    response.json(updatedBlog)
+    if (blog.user.toString() !== user._id.toString()) {
+      return response.status(400).json({ error: "This user can't update this blog"})
+    } else {
+        
+      blog.title = title
+      blog.author = author
+      blog.url = url
+      blog.likes = likes || 0
+      
+      const updatedBlog = await blog.save()
+      response.json(updatedBlog)
+    }
 
   } catch (error) {
     console.error(error)
