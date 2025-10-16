@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from 'react'
 import './App.css'
-import AddBlog from "./components/AddBlog"
-import BlogList from "./components/BlogList"
-import Notice from "./components/Notice"
-import LoggedUser from "./components/LoggedUser"
-import blogService from "./services/blog"
-import loginService from "./services/login"
-import LoginForm from "./components/LoginForm"
+import AddBlog from './components/AddBlog'
+import BlogList from './components/BlogList'
+import Notice from './components/Notice'
+import LoggedUser from './components/LoggedUser'
+import blogService from './services/blog'
+import loginService from './services/login'
+import LoginForm from './components/LoginForm'
+import Togglable from './components/Togglable'
 
 const App = () => {
 
@@ -16,13 +17,10 @@ const App = () => {
   const [user, setUser] = useState(null)
   const [notice, setNotice] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [title, setTitle] = useState('')
-  const [author, setAuthor] = useState('')
-  const [url, setUrl] = useState('')
-  const [likes, setLikes] = useState('')
   const [loginVisible, setLoginVisible] = useState(false)
 
-  
+  const addBlogRef = useRef()
+
   useEffect(() => {
     blogService.getAll().then(initialBlogs => {
       setBlogs(initialBlogs)
@@ -67,80 +65,38 @@ const App = () => {
     )
   }
 
-  const resetFields = () => {
-    setTitle('')
-    setAuthor('')
-    setUrl('')
-    setLikes('')
+  const addBlog = async (blogObject) => {
+    const createdBlog = await blogService.create(blogObject)
+    setBlogs(blogs.concat(createdBlog))
+    noticeSetter(`New blog "${createdBlog.title}" added succesfully`)
+    addBlogRef.current.toggleVisibility()
   }
 
-  const addBlog = async (event) => {
-    event.preventDefault()
-
-    const blogObject = {
-      title: title,
-      author: author,
-      url: url,
-      likes: likes
-    }
-
-    if (blogObject.likes === "") {
-      blogObject.likes = 0
-    }
-
-    if (!blogObject.title || !blogObject.url) {
-          console.log('Post failed! New blog must contain title and url!')
-          setErrorMessage('Post failed! New blog must contain title and url!')
-          setTimeout(() => {
-            setErrorMessage(null)
-          }, 5000)
-          resetFields()
-
-    } else {
-
-      const blogTitles = blogs.map(b => b.title)
-
-      if (blogTitles.includes(title)) {
-        if (window.confirm(`${title} is already in bloglist. Do you want to update it?`)) {
-
-            const blogToUpdate = blogs.find(blog => blog.title === title)
-            console.log('Blog to update: ', blogToUpdate)
-            try {
-
-              const updatedBlog = await blogService.updateBlog(blogToUpdate.id, blogObject)
-              setBlogs(blogs.map(blog => blog.id === updatedBlog.id ? updatedBlog : blog))
-              console.log(`${title} updated succesfully`)
-              setNotice(`${title} updated succesfully`)
-              setTimeout(() => {
-                setNotice(null)
-              }, 5000)
-              
-              resetFields()
-
-            } catch {
-              setErrorMessage('This user cannot update this blog!')
-              setTimeout(() => {
-                setErrorMessage(null)
-              }, 5000)
-            }
-          
-        } else {
-          console.log("Adding a new blog cancelled")
-        }
-
-      } else { 
-        const createdBlog = await blogService.create(blogObject)
-        setBlogs(blogs.concat(createdBlog))
-        console.log(`${createdBlog.title} created succesfully`)
-        setNotice(`New blog "${createdBlog.title}" added succesfully`)
-        setTimeout(() => {
-          setNotice(null)
-        }, 5000)
-
-       resetFields()
-      }
+  const updateBlog = async (blogToUpdate, blogObject) => {
+    try {
+      const updatedBlog = await blogService.updateBlog(blogToUpdate.id, blogObject)
+      setBlogs(blogs.map(blog => blog.id === updatedBlog.id ? updatedBlog : blog))
+      noticeSetter(`${blogToUpdate.title} updated succesfully`)
+      addBlogRef.current.toggleVisibility()
+    } catch {
+      setErrorMessage('This user cannot update this blog!')
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
     }
   }
+
+
+
+  const likeBlog = async (blogToUpdate) => {
+    try {
+      const updatedBlog = await blogService.likeBlog(blogToUpdate.id)
+      setBlogs(blogs.map(blog => blog.id === updatedBlog.id ? updatedBlog : blog))
+    } catch {
+      console.log('Like failed')
+    }
+  }
+
 
   const handleLogin = async event => {
     event.preventDefault()
@@ -173,41 +129,60 @@ const App = () => {
     return(
       <div>
         <div style={hideWhenVisible}>
-          <button onClick={() => setLoginVisible(true)} className="button">Log in</button>
+          <button onClick={() => setLoginVisible(true)} className='button'>Log in</button>
         </div>
         <div style={showWhenVisible}>
-          <LoginForm 
-            username={username} setUsername={setUsername} 
-            password={password} setPassword={setPassword} 
-            handleLogin={handleLogin}  
+          <LoginForm
+            username={username} setUsername={setUsername}
+            password={password} setPassword={setPassword}
+            handleLogin={handleLogin}
           />
-          <button onClick={() => setLoginVisible(false)} className="button">Cancel</button>
+          <button onClick={() => setLoginVisible(false)} className='button'>Cancel</button>
         </div>
       </div>
     )
   }
 
-  const loggedView = () => (
-    <div>
-      <LoggedUser user={user} logOut={logOut}/>
-      <AddBlog 
-        addBlog={ addBlog } 
-        title={ title } setTitle={ setTitle } 
-        author={ author } setAuthor={ setAuthor } 
-        url={ url } setUrl={ setUrl } 
-        likes={ likes } setLikes={ setLikes }
-      />
-      <BlogList blogs={blogs} deleteBlog={deleteBlog}/>
-    </div>
-  )
+  const errorMessageSetter = (message) => {
+    setErrorMessage(message)
+    setTimeout(() => {
+      setErrorMessage(null)
+    }, 5000)
+  }
+
+  const noticeSetter = (message) => {
+    setNotice(message)
+    setTimeout(() => {
+      setNotice(null)
+    }, 5000)
+  }
 
   return (
-    <div className="mainDiv">
+    <div className='mainDiv'>
       <h1>BLOGS</h1>
       <p><i>Here is a list of blogs and their likes</i></p>
       <Notice notice={notice} errorMessage={errorMessage}/>
+
+      {/*IF USER NOT LOGGED IN ->*/}
       {!user && loginForm()}
-      {user && loggedView()}
+
+      {/*IF USER LOGGED IN ->*/}
+      {user &&
+      <div>
+        <div className='individual'>
+          <LoggedUser user={user} logOut={logOut}/>
+          <Togglable buttonLabel='Add blog' ref={addBlogRef}>
+            <AddBlog
+              addBlog={ addBlog }
+              updateBlog={ updateBlog }
+              blogs ={ blogs }
+              errorMessageSetter= { errorMessageSetter }
+            />
+          </Togglable>
+        </div>
+        <BlogList blogs={blogs} deleteBlog={deleteBlog} likeBlog={likeBlog}/>
+      </div>}
+
       <i><p>Site made as an exercise of a fullstack course<br />made by Veeti</p></i>
     </div>
   )

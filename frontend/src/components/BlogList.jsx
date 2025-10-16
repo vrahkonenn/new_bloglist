@@ -1,11 +1,15 @@
-import IndividualBlog from "./IndividualBlog"
+import IndividualBlog from './IndividualBlog'
 
-const BlogList = ({ blogs, deleteBlog}) => {
+const BlogList = ({ blogs, deleteBlog, likeBlog }) => {
   return(
     <div>
-      {blogs.map(blog => (
-        <IndividualBlog key={blog.id} blog={blog} deleteBlog={deleteBlog}/>
-      ))}
+      {blogs
+        .slice()
+        .sort((a, b) => b.likes - a.likes)
+        .map(blog => (
+          <IndividualBlog key={ blog.id } blog={ blog } deleteBlog={ deleteBlog } likeBlog={ likeBlog }/>
+        ))
+      }
     </div>
   )
 }

@@ -1,3 +1,9 @@
+body {
+    background-color:#023436;
+    text-align: center; 
+    color: #03b5aa;
+}
+
 .individual {
     text-align: center;
     margin: 10px auto;
@@ -18,12 +24,7 @@
     color: #03b5aa;
     text-align: center;
 }
-  
-@media only screen and (max-width: 600px) {
-    .individual {
-        width: 100%;
-    }
-}
+
 
 .button {
     padding: 8px;
@@ -46,4 +47,10 @@
     font-weight: bold;
     background-color: green;
     border-color: white;
+}
+  
+@media only screen and (max-width: 600px) {
+    .individual {
+        width: 100%;
+    }
 }

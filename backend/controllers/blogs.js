@@ -3,6 +3,7 @@ const Blog = require('../models/blog')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 const middleware = require('../utils/middleware')
+const { request } = require('express')
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', {username: 1, name:1})
@@ -31,11 +32,10 @@ blogsRouter.post('/', middleware.tokenExtractor, middleware.userExtractor, async
     user.blogs = user.blogs.concat(savedBlog._id)
     await user.save()
     
-    response.status(201).json(savedBlog)
-    console.log('Post succesful')
-
     const populatedBlog = await savedBlog.populate('user', { username: 1, name: 1 })
     response.status(201).json(populatedBlog)
+    console.log('Post succesful')
+
 })
 
 blogsRouter.delete('/:id', middleware.userExtractor, async (request, response) => {
@@ -91,6 +91,25 @@ blogsRouter.put('/:id', async (request, response) => {
       response.json(updatedBlog)
     }
 
+  } catch (error) {
+    console.error(error)
+    response.status(500).json({ error: 'something went wrong' })
+  }
+})
+
+blogsRouter.put('/like/:id', async (request, response) => {
+  try {
+    const blog = await Blog.findById(request.params.id)
+    if (!blog) return response.status(404).end()
+
+    blog.likes = (request.body.likes !== undefined)
+      ? request.body.likes
+      : blog.likes + 1
+
+    const updatedBlog = await blog.save()
+    const populatedBlog = await updatedBlog.populate('user', { username: 1, name: 1 })
+
+    response.json(populatedBlog)
   } catch (error) {
     console.error(error)
     response.status(500).json({ error: 'something went wrong' })
