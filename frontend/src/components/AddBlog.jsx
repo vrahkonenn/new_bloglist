@@ -54,19 +54,42 @@ const AddBlog = ({ addBlog, updateBlog, blogs, errorMessageSetter }) => {
       <form onSubmit={sendBlog}>
         <div className='input'>
           <label htmlFor='title'>Title</label>
-          <input id='title' type='text' value={ title } onChange={({ target }) => setTitle(target.value)}></input>
+          <input 
+            id='title'
+            type='text'
+            value={ title }
+            onChange={({ target }) => setTitle(target.value)}
+            placeholder='title'>
+          </input>
         </div>
         <div className='input'>
           <label htmlFor='author'>Author</label>
-          <input id='author' type='text' value={ author } onChange={({ target }) => setAuthor(target.value)}></input>
+          <input 
+            id='author'
+            type='text'
+            value={ author }
+            onChange={({ target }) => setAuthor(target.value)}
+            placeholder='author'>
+          </input>
         </div>
         <div className='input'>
           <label htmlFor='url'>URL</label>
-          <input id='url' type='text' value={ url } onChange={({ target }) => setUrl(target.value)}></input>
+          <input
+            id='url'
+            type='text'
+            value={ url }
+            onChange={({ target }) => setUrl(target.value)}
+            placeholder='url'>
+          </input>
         </div>
         <div className='input'>
           <label htmlFor='likes'>Likes</label>
-          <input id='likes' type='text' value={ likes } onChange={({ target }) => setLikes(target.value)}></input>
+          <input id='likes'
+            type='text'
+            value={ likes }
+            onChange={({ target }) => setLikes(target.value)}
+            placeholder='likes'>
+          </input>
         </div>
         <button className='button' type='submit'>Add</button>
       </form>
